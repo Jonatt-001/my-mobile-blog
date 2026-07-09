@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My First Article</title>
+<meta name="description" content="Local LLMs can't reach the outside world on their own. Ask one what time it is or how many words are in a sentence, and it'll often guess or say no unless">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://Jonatt-001.github.io/my-mobile-blog/article/my-first-article/">
+<meta property="og:title" content="My First Article">
+<meta property="og:description" content="Local LLMs can't reach the outside world on their own. Ask one what time it is or how many words are in a sentence, and it'll often guess or say no unless">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2026-07-09">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"My First Article","datePublished":"2026-07-09","author":{"@type":"Organization","name":"Jonatt-001"},"publisher":{"@type":"Organization","name":"Jonatt-001"}}</script>
+<style>body{font-family:system-ui;max-width:680px;margin:0 auto;padding:20px;line-height:1.6;color:#111;background:#fafafa}h1{margin-bottom:8px}time{color:#666;font-size:0.9rem}article{background:#fff;padding:24px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.05)}a{color:#0969da}img{max-width:100%}</style>
+</head><body><article><h1>My First Article</h1><time>2026-07-09</time><div><p>Local LLMs can't reach the outside world on their own. Ask one what time it is or how many words are in a sentence, and it'll often guess or say no unless you give it a way to find the answer. The model only has what's in its training data and what you typed in the prompt.</p>
+<p>Second, models don't have memory. They forget everything the moment you send a new message. You ask a question, get an answer, ask a follow-up and the model has no idea what you're referring to. Every turn starts from zero.</p>
+<p>Cloud hosted models like Claude and ChatGPT already support these features. But local LLMs do not. In this tutorial, I'll show you how to build a local AI agent that fixes both problems. It calls Python functions on its own when it needs to, and it remembers the conversation so follow-up questions work like they should. It runs entirely on your local machine to preserve privacy and has no API costs.</p>
+<p>To follow along, you'll need Ollama installed on your machine. The example works on macOS, Windows, and Linux. I'm using a MacBook Pro with 32 GB of RAM, but you can run this on a lower-memory machine by choosing a smaller Qwen model in Ollama.</p>
+<p>What is Tool Calling?
+Tool calling is a pattern where the LLM decides when to run your Python functions instead of you calling them upfront. A tool is just a Python function the model is allowed to call. The model decides when to call it and what arguments to pass. You decide what the tool actually does.</p>
+<p>Under the hood, the model doesn't run code directly. It emits a structured request that says, in effect, "call this tool with these arguments." Your code executes the function, sends the result back to the model, and the model decides what to do next: call another tool or produce a final answer.</p>
+<p>Not every model supports tool calling well. Qwen is a strong open-weight option for local tool-calling experiments, which is why I'm using it here.</p>
+<p>LangChain v1's create_agent handles tool calling. You give it a model, a list of tools, and a system prompt, and it takes care of the call-and-respond cycle until the model is done.</p>
+<p>What is Memory in an LLM?
+LLMs are stateless. Every call sends the full conversation as input, and the model responds based on only what's in that input. "Memory" in an agent is just the pattern of what you choose to send back to the model on the next call.</p></div></article></body></html>
