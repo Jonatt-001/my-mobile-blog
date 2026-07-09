@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Publisher - News.dyve.online</title>
+<style>
+  :root { --bg:#0f1115; --card:#181a20; --text:#e6e9ef; --accent:#58a6ff; --border:#2d333b; }
+  * { box-sizing: border-box; margin:0; padding:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  body { background: var(--bg); color: var(--text); padding: 16px; min-height: 100vh; }
+  h1 { font-size: 1.4rem; margin-bottom: 12px; }
+  input, textarea, select { width: 100%; padding: 12px; margin-bottom: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 1rem; }
+  textarea { min-height: 250px; resize: vertical; }
+  button { width: 100%; padding: 14px; background: var(--accent); color: #000; font-weight: 600; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; }
+  button:disabled { opacity: 0.6; }
+  #status { margin-top: 12px; font-size: 0.9rem; color: #8b949e; white-space: pre-wrap; }
+  .info { font-size: 0.8rem; color: #8b949e; margin-top: 8px; }
+  .back-link { display: block; margin-bottom: 20px; color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+  <a href="/" class="back-link">← Back to Site</a>
+  <h1>📰 Publish Article</h1>
+  <input id="repoOwner" placeholder="GitHub Username" value="Jonatt-001">
+  <input id="repoName" placeholder="Repo Name" value="my-mobile-blog">
+  <input id="token" type="password" placeholder="GitHub PAT (repo scope)">
+  <input id="title" placeholder="Article Title">
+  <input id="category" placeholder="Category (e.g., Technology)">
+  <textarea id="content" placeholder="Write your article in Markdown..."></textarea>
+  <button id="btn" onclick="publish()">Publish to GitHub</button>
+  <div id="status"></div>
+
+<script>
+const slugify = str => str.toLowerCase().trim()
+  .replace(/[^\w\s-]/g, '')
+  .replace(/[\s_-]+/g, '-')
+  .replace(/^-+|-+$/g, '')
+  .substring(0, 60);
+
+const parseMd = md => {
+  let h = md.replace(/^### (.*$)/gim, '<h3>$1</h3>')
+            .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+            .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+            .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+            .replace(/\*(.*)\*/gim, '<em>$1</em>')
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2">$1</a>');
+  return h.split(/\n\n+/).map(p => `<p>${p}</p>`).join('\n');
+};
+
+async function publish() {
+  const owner = document.getElementById('repoOwner').value.trim();
+  const repo = document.getElementById('repoName').value.trim();
+  const token = document.getElementById('token').value.trim();
+  const title = document.getElementById('title').value.trim();
+  const category = document.getElementById('category').value.trim() || 'General';
+  const content = document.getElementById('content').value.trim();
+  const status = document.getElementById('status');
+  const btn = document.getElementById('btn');
+
+  if (!owner || !token || !title || !content) { 
+    status.textContent = "⚠️ Fill all required fields"; 
+    return; 
+  }
+  
+  btn.disabled = true; 
+  btn.textContent = "Publishing..."; 
+  status.textContent = "Creating article...";
+
+  const slug = slugify(title);
+  const date = new Date().toISOString();
+  const excerpt = content.replace(/[#*`\n]/g, '').substring(0, 155).trim();
+  
+  const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${title} | News.dyve.online</title>
+<meta name="description" content="${excerpt}">
+<link rel="canonical" href="https://news.dyve.online/article/${slug}/">
+<meta property="og:title" content="${title}">
+<meta property="og:description" content="${excerpt}">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://news.dyve.online/article/${slug}/">
+<meta property="article:published_time" content="${date}">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header><h1><a href="/">News.dyve.online</a></h1></header>
+<main class="post">
+<a href="/" class="back-link">← Back to Home</a>
+<h1>${title}</h1>
+<div class="meta">${category} &bull; ${new Date(date).toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'})}</div>
+${parseMd(content)}
+</main>
+<footer>&copy; 2026 News.dyve.online</footer>
+</body></html>`;
+
+  try {
+    // 1. Create Article HTML
+    const articlePath = `article/${slug}/index.html`;
+    const articleRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${articlePath}`, {
+      method: "PUT",
+      headers: { 
+        "Authorization": `Bearer ${token}`, 
+        "Content-Type": "application/json",
+        "Accept": "application/vnd.github.v3+json"
+      },
+      body: JSON.stringify({ 
+        message: `Publish: ${title}`, 
+        content: btoa(unescape(encodeURIComponent(htmlContent))), 
+        branch: "main" 
+      })
+    });
+    
+    if (!articleRes.ok) {
+      const err = await articleRes.json();
+      throw new Error(`GitHub API: ${err.message || articleRes.status}`);
+    }
+
+    status.textContent = "Updating article index...";
+
+    // 2. Update articles.json
+    const jsonPath = 'articles.json';
+    const jsonUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${jsonPath}`;
+    let articles = [], sha = null;
+
+    const getRes = await fetch(jsonPath, { 
+      headers: { 
+        "Authorization": `Bearer ${token}`,
+        "Accept": "application/vnd.github.v3+json"
+      } 
+    });
+    
+    if (getRes.ok) {
+      const getData = await getRes.json();
+      sha = getData.sha;
+      try {
+        articles = JSON.parse(atob(getData.content));
+      } catch(e) { articles = []; }
+    }
+
+    // Remove duplicate if exists
+    articles = articles.filter(a => a.slug !== slug);
+    articles.unshift({ title, slug, category, date, excerpt, url: `/article/${slug}/` });
+
+    const updateRes = await fetch(jsonPath, {
+      method: "PUT",
+      headers: { 
+        "Authorization": `Bearer ${token}`, 
+        "Content-Type": "application/json",
+        "Accept": "application/vnd.github.v3+json"
+      },
+      body: JSON.stringify({ 
+        message: `Update index: ${title}`, 
+        content: btoa(unescape(encodeURIComponent(JSON.stringify(articles, null, 2)))), 
+        branch: "main", 
+        sha: sha || undefined 
+      })
+    });
+    
+    if (!updateRes.ok) {
+      const err = await updateRes.json();
+      throw new Error(`Index update failed: ${err.message || updateRes.status}`);
+    }
+
+    status.textContent = `✅ Published!\n🔗 https://news.dyve.online/article/${slug}/\n\nNetlify will deploy in ~1 min.`;
+    document.getElementById('title').value = "";
+    document.getElementById('content').value = "";
+  } catch (e) {
+    status.textContent = `❌ Error: ${e.message}\n\nTip: Check your PAT has 'repo' scope`;
+  } finally {
+    btn.disabled = false; 
+    btn.textContent = "Publish to GitHub";
+  }
+}
+</script>
+</body>
+</html>
+
