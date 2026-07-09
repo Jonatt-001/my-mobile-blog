@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ChatGPT Ads rolling out audience lists | News.dyve.online</title>
+<meta name="description" content="Local LLMs can't reach the outside world on their own. Ask one what time it is or how many words are in a sentence, and it'll often guess or say no unless">
+<link rel="canonical" href="https://news.dyve.online/article/chatgpt-ads-rolling-out-audience-lists/">
+<meta property="og:title" content="ChatGPT Ads rolling out audience lists">
+<meta property="og:description" content="Local LLMs can't reach the outside world on their own. Ask one what time it is or how many words are in a sentence, and it'll often guess or say no unless">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://news.dyve.online/article/chatgpt-ads-rolling-out-audience-lists/">
+<meta property="article:published_time" content="2026-07-09T05:32:09.828Z">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header><h1><a href="/">News.dyve.online</a></h1></header>
+<main class="post">
+<a href="/" class="back-link">← Back to Home</a>
+<h1>ChatGPT Ads rolling out audience lists</h1>
+<div class="meta">Technology &bull; July 9, 2026</div>
+<p>Local LLMs can't reach the outside world on their own. Ask one what time it is or how many words are in a sentence, and it'll often guess or say no unless you give it a way to find the answer. The model only has what's in its training data and what you typed in the prompt.</p>
+<p>Second, models don't have memory. They forget everything the moment you send a new message. You ask a question, get an answer, ask a follow-up and the model has no idea what you're referring to. Every turn starts from zero.</p>
+<p>Cloud hosted models like Claude and ChatGPT already support these features. But local LLMs do not. In this tutorial, I'll show you how to build a local AI agent that fixes both problems. It calls Python functions on its own when it needs to, and it remembers the conversation so follow-up questions work like they should. It runs entirely on your local machine to preserve privacy and has no API costs.</p>
+<p>To follow along, you'll need Ollama installed on your machine. The example works on macOS, Windows, and Linux. I'm using a MacBook Pro with 32 GB of RAM, but you can run this on a lower-memory machine by choosing a smaller Qwen model in Ollama.</p>
+<p>What is Tool Calling? Tool calling is a pattern where the LLM decides when to run your Python functions instead of you calling them upfront. A tool is just a Python function the model is allowed to call. The model decides when to call it and what arguments to pass. You decide what the tool actually does.</p>
+<p>Under the hood, the model doesn't run code directly. It emits a structured request that says, in effect, "call this tool with these arguments." Your code executes the function, sends the result back to the model, and the model decides what to do next: call another tool or produce a final answer.</p>
+<p>Not every model supports tool calling well. Qwen is a strong open-weight option for local tool-calling experiments, which is why I'm using it here.</p>
+<p>LangChain v1's create_agent handles tool calling. You give it a model, a list of tools, and a system prompt, and it takes care of the call-and-respond cycle until the model is done.</p>
+<p>What is Memory in an LLM? LLMs are stateless. Every call sends the full conversation as input, and the model responds based on only what's in that input. "Memory" in an agent is just the pattern of what you choose to send back to the model on the next call.</p>
+</main>
+<footer>&copy; 2026 News.dyve.online</footer>
+</body></html>
