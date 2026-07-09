@@ -3,32 +3,610 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Publisher - News.dyve.online</title>
+<title>DyveNews Publisher</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap" rel="stylesheet">
 <style>
-  :root { --bg:#0f1115; --card:#181a20; --text:#e6e9ef; --accent:#58a6ff; --border:#2d333b; }
-  * { box-sizing: border-box; margin:0; padding:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-  body { background: var(--bg); color: var(--text); padding: 16px; min-height: 100vh; }
-  h1 { font-size: 1.4rem; margin-bottom: 12px; }
-  input, textarea, select { width: 100%; padding: 12px; margin-bottom: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 1rem; }
-  textarea { min-height: 250px; resize: vertical; }
-  button { width: 100%; padding: 14px; background: var(--accent); color: #000; font-weight: 600; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; }
-  button:disabled { opacity: 0.6; }
-  #status { margin-top: 12px; font-size: 0.9rem; color: #8b949e; white-space: pre-wrap; }
-  .info { font-size: 0.8rem; color: #8b949e; margin-top: 8px; }
-  .back-link { display: block; margin-bottom: 20px; color: var(--accent); text-decoration: none; }
+  :root {
+    --bg: #f8f9fa;
+    --card: #ffffff;
+    --text: #202124;
+    --text-secondary: #5f6368;
+    --accent: #1a73e8;
+    --accent-hover: #1557b0;
+    --border: #e8eaed;
+    --success: #34a853;
+    --warning: #fbbc04;
+    --error: #ea4335;
+    --shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--text);
+    text-decoration: none;
+    letter-spacing: -0.5px;
+  }
+
+  .nav-logo span { color: var(--accent); font-weight: 600; }
+
+  .nav-links {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+  }
+
+  .nav-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--text); }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  .header {
+    margin-bottom: 32px;
+  }
+
+  .header h1 {
+    font-size: 32px;
+    font-weight: 500;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+  }
+
+  .header p {
+    color: var(--text-secondary);
+    font-size: 16px;
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+
+  .card-title {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .form-group label .required {
+    color: var(--error);
+    margin-left: 2px;
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 15px;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+  }
+
+  .form-group textarea {
+    min-height: 400px;
+    resize: vertical;
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .form-group .hint {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 6px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 768px) {
+    .form-row { grid-template-columns: 1fr; }
+  }
+
+  .slug-preview {
+    background: var(--bg);
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+    word-break: break-all;
+  }
+
+  .slug-preview strong {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .seo-preview {
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 12px;
+  }
+
+  .seo-preview-title {
+    font-size: 18px;
+    color: var(--accent);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  .seo-preview-url {
+    font-size: 13px;
+    color: var(--success);
+    margin-bottom: 8px;
+  }
+
+  .seo-preview-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .seo-score {
+    display: flex;
+    gap: 16px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  .seo-metric {
+    flex: 1;
+    min-width: 120px;
+    background: white;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  .seo-metric-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+
+  .seo-metric-value {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .seo-metric-value.good { color: var(--success); }
+  .seo-metric-value.warning { color: var(--warning); }
+  .seo-metric-value.error { color: var(--error); }
+
+  .btn {
+    width: 100%;
+    padding: 16px 32px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn:hover:not(:disabled) {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .btn-secondary {
+    background: white;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--bg);
+  }
+
+  .status {
+    margin-top: 24px;
+    padding: 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.6;
+    display: none;
+  }
+
+  .status.show { display: block; }
+
+  .status.success {
+    background: rgba(52, 168, 83, 0.1);
+    border: 1px solid var(--success);
+    color: #137333;
+  }
+
+  .status.error {
+    background: rgba(234, 67, 53, 0.1);
+    border: 1px solid var(--error);
+    color: #c5221f;
+  }
+
+  .status.info {
+    background: rgba(26, 115, 232, 0.1);
+    border: 1px solid var(--accent);
+    color: #1967d2;
+  }
+
+  .status h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .status a {
+    color: inherit;
+    text-decoration: underline;
+    font-weight: 500;
+  }
+
+  .progress {
+    margin-top: 16px;
+  }
+
+  .progress-step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+
+  .progress-step.active {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .progress-step.complete {
+    color: var(--success);
+  }
+
+  .progress-step::before {
+    content: '';
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  .progress-step.active::before {
+    background: var(--accent);
+    border-color: var(--accent);
+    animation: pulse 1.5s infinite;
+  }
+
+  .progress-step.complete::before {
+    background: var(--success);
+    border-color: var(--success);
+    content: '✓';
+    color: white;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .markdown-help {
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .markdown-help h4 {
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .markdown-help code {
+    background: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 12px;
+    color: var(--accent);
+  }
+
+  .markdown-help ul {
+    list-style: none;
+    margin-top: 8px;
+  }
+
+  .markdown-help li {
+    margin-bottom: 4px;
+  }
+
+  .internal-links {
+    margin-top: 16px;
+    padding: 16px;
+    background: var(--bg);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  .internal-links h4 {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+
+  .internal-link-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+    background: white;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+
+  .internal-link-item:last-child { margin-bottom: 0; }
+
+  .internal-link-item .keyword {
+    font-weight: 500;
+    color: var(--accent);
+  }
+
+  .internal-link-item .arrow {
+    color: var(--text-secondary);
+  }
+
+  .internal-link-item .title {
+    color: var(--text);
+    flex: 1;
+  }
+
+  @media (max-width: 768px) {
+    .container { padding: 24px 16px 60px; }
+    .card { padding: 24px 20px; }
+    .header h1 { font-size: 28px; }
+    nav { padding: 12px 16px; }
+    .nav-links { gap: 16px; }
+  }
 </style>
 </head>
 <body>
-  <a href="/" class="back-link">← Back to Site</a>
-  <h1>📰 Publish Article</h1>
-  <input id="repoOwner" placeholder="GitHub Username" value="Jonatt-001">
-  <input id="repoName" placeholder="Repo Name" value="my-mobile-blog">
-  <input id="token" type="password" placeholder="GitHub PAT (repo scope)">
-  <input id="title" placeholder="Article Title">
-  <input id="category" placeholder="Category (e.g., Technology)">
-  <textarea id="content" placeholder="Write your article in Markdown..."></textarea>
-  <button id="btn" onclick="publish()">Publish to GitHub</button>
-  <div id="status"></div>
+
+<nav>
+  <a href="/" class="nav-logo">Dyve<span>News</span></a>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/">Articles</a>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="header">
+    <h1>📝 Publish Article</h1>
+    <p>Create and publish your article to DyveNews</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">⚙️ Configuration</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>GitHub Username</label>
+        <input type="text" id="repoOwner" value="Jonatt-001" placeholder="Your GitHub username">
+      </div>
+      <div class="form-group">
+        <label>Repository Name</label>
+        <input type="text" id="repoName" value="my-mobile-blog" placeholder="Repository name">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>GitHub Personal Access Token <span class="required">*</span></label>
+      <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxx">
+      <div class="hint">Token needs 'repo' scope. <a href="https://github.com/settings/tokens" target="_blank" style="color: var(--accent);">Generate token</a></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📄 Article Details</div>
+    <div class="form-group">
+      <label>Title <span class="required">*</span></label>
+      <input type="text" id="title" placeholder="Enter your article title" oninput="updatePreview()">
+      <div class="slug-preview" id="slugPreview">
+        URL: <strong>https://news.dyve.online/article/your-article-title/</strong>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Category <span class="required">*</span></label>
+        <select id="category">
+          <option value="Technology">Technology</option>
+          <option value="Business">Business</option>
+          <option value="Future">Future</option>
+          <option value="AI">AI</option>
+          <option value="News">News</option>
+          <option value="Tutorial">Tutorial</option>
+          <option value="Opinion">Opinion</option>
+          <option value="General">General</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Tags (comma-separated)</label>
+        <input type="text" id="tags" placeholder="ai, tech, startup">
+        <div class="hint">Add relevant tags for better discoverability</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Featured Image URL</label>
+      <input type="url" id="image" placeholder="https://example.com/image.jpg">
+      <div class="hint">Optional: Add a hero image for your article</div>
+    </div>
+
+    <div class="form-group">
+      <label>SEO Description</label>
+      <input type="text" id="description" placeholder="Brief description for search engines (auto-generated if empty)" maxlength="160" oninput="updatePreview()">
+      <div class="hint">Max 160 characters. Leave empty to auto-generate from content.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">✍️ Content</div>
+    <div class="form-group">
+      <label>Article Content (Markdown) <span class="required">*</span></label>
+      <textarea id="content" placeholder="Write your article in Markdown..." oninput="updatePreview()"></textarea>
+      <div class="markdown-help">
+        <h4>Markdown Guide:</h4>
+        <ul>
+          <li><code># Heading 1</code> - Main heading</li>
+          <li><code>## Heading 2</code> - Subheading</li>
+          <li><code>**bold**</code> - Bold text</li>
+          <li><code>*italic*</code> - Italic text</li>
+          <li><code>[link text](url)</code> - Hyperlink</li>
+          <li><code>![alt](image-url)</code> - Image</li>
+          <li><code>> quote</code> - Blockquote</li>
+          <li><code>- item</code> - Bullet list</li>
+          <li><code>1. item</code> - Numbered list</li>
+          <li><code>`code`</code> - Inline code</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="internal-links" id="internalLinks" style="display: none;">
+      <h4>🔗 Auto Internal Links Detected</h4>
+      <div id="internalLinksList"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔍 SEO Preview</div>
+    <div class="seo-preview">
+      <div class="seo-preview-title" id="seoTitle">Article Title | DyveNews</div>
+      <div class="seo-preview-url" id="seoUrl">https://news.dyve.online/article/your-article-title/</div>
+      <div class="seo-preview-desc" id="seoDesc">Your article description will appear here...</div>
+    </div>
+    <div class="seo-score">
+      <div class="seo-metric">
+        <div class="seo-metric-label">Word Count</div>
+        <div class="seo-metric-value" id="wordCount">0</div>
+      </div>
+      <div class="seo-metric">
+        <div class="seo-metric-label">Reading Time</div>
+        <div class="seo-metric-value" id="readTime">0 min</div>
+      </div>
+      <div class="seo-metric">
+        <div class="seo-metric-label">Description</div>
+        <div class="seo-metric-value" id="descLength">0/160</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn" id="btn" onclick="publish()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <path d="M5 12h14M12 5l7 7-7 7"/>
+    </svg>
+    Publish Article
+  </button>
+
+  <div class="status" id="status"></div>
+</div>
 
 <script>
 const slugify = str => str.toLowerCase().trim()
@@ -38,143 +616,667 @@ const slugify = str => str.toLowerCase().trim()
   .substring(0, 60);
 
 const parseMd = md => {
-  let h = md.replace(/^### (.*$)/gim, '<h3>$1</h3>')
-            .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-            .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-            .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
-            .replace(/\*(.*)\*/gim, '<em>$1</em>')
-            .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2">$1</a>');
-  return h.split(/\n\n+/).map(p => `<p>${p}</p>`).join('\n');
+  let h = md
+    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+    .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/gim, '<em>$1</em>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/gim, '<img src="$2" alt="$1" loading="lazy">')
+    .replace(/^> (.*$)/gim, '<blockquote><p>$1</p></blockquote>')
+    .replace(/`(.*?)`/gim, '<code>$1</code>')
+    .replace(/^- (.*$)/gim, '<li>$1</li>')
+    .replace(/^(\d+)\. (.*$)/gim, '<li>$2</li>');
+  
+  h = h.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+  return h.split(/\n\n+/).map(p => {
+    if (p.match(/^<(h[1-6]|ul|ol|blockquote|img)/)) return p;
+    return `<p>${p}</p>`;
+  }).join('\n');
 };
+
+let existingArticles = [];
+
+async function loadExistingArticles() {
+  const owner = document.getElementById('repoOwner').value.trim();
+  const repo = document.getElementById('repoName').value.trim();
+  const token = document.getElementById('token').value.trim();
+  
+  if (!owner || !repo || !token) return;
+  
+  try {
+    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/articles.json`, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Accept": "application/vnd.github.v3+json"
+      }
+    });
+    
+    if (res.ok) {
+      const data = await res.json();
+      existingArticles = JSON.parse(atob(data.content));
+      detectInternalLinks();
+    }
+  } catch (e) {
+    console.log('No existing articles yet');
+  }
+}
+
+function detectInternalLinks() {
+  const content = document.getElementById('content').value.toLowerCase();
+  const container = document.getElementById('internalLinks');
+  const list = document.getElementById('internalLinksList');
+  
+  if (existingArticles.length === 0) {
+    container.style.display = 'none';
+    return;
+  }
+  
+  const detected = [];
+  
+  existingArticles.forEach(article => {
+    const titleWords = article.title.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+    const matchedWords = titleWords.filter(word => content.includes(word));
+    
+    if (matchedWords.length >= 2 || content.includes(article.title.toLowerCase())) {
+      detected.push({
+        keyword: matchedWords.slice(0, 3).join(', '),
+        title: article.title,
+        url: article.url
+      });
+    }
+  });
+  
+  if (detected.length > 0) {
+    container.style.display = 'block';
+    list.innerHTML = detected.map(d => `
+      <div class="internal-link-item">
+        <span class="keyword">${d.keyword}</span>
+        <span class="arrow">→</span>
+        <span class="title">${d.title}</span>
+      </div>
+    `).join('');
+  } else {
+    container.style.display = 'none';
+  }
+}
+
+function updatePreview() {
+  const title = document.getElementById('title').value.trim();
+  const content = document.getElementById('content').value.trim();
+  const description = document.getElementById('description').value.trim();
+  
+  const slug = slugify(title || 'your-article-title');
+  const url = `https://news.dyve.online/article/${slug}/`;
+  
+  document.getElementById('slugPreview').innerHTML = `URL: <strong>${url}</strong>`;
+  document.getElementById('seoUrl').textContent = url;
+  document.getElementById('seoTitle').textContent = title ? `${title} | DyveNews` : 'Article Title | DyveNews';
+  
+  const words = content.split(/\s+/).filter(w => w.length > 0);
+  const wordCount = words.length;
+  const readTime = Math.max(1, Math.ceil(wordCount / 200));
+  
+  document.getElementById('wordCount').textContent = wordCount;
+  document.getElementById('wordCount').className = 'seo-metric-value' + (wordCount > 300 ? ' good' : wordCount > 100 ? ' warning' : ' error');
+  
+  document.getElementById('readTime').textContent = `${readTime} min`;
+  document.getElementById('readTime').className = 'seo-metric-value good';
+  
+  let desc = description;
+  if (!desc && content) {
+    desc = content.replace(/[#*`\n\[\]()]/g, '').substring(0, 155).trim();
+    if (desc.length > 0 && !desc.endsWith('.')) desc += '...';
+  }
+  
+  document.getElementById('seoDesc').textContent = desc || 'Your article description will appear here...';
+  
+  const descLength = desc.length;
+  document.getElementById('descLength').textContent = `${descLength}/160`;
+  document.getElementById('descLength').className = 'seo-metric-value' + (descLength > 50 && descLength <= 160 ? ' good' : descLength > 0 ? ' warning' : ' error');
+  
+  detectInternalLinks();
+}
+
+function showStatus(type, title, message, url = null) {
+  const status = document.getElementById('status');
+  status.className = `status show ${type}`;
+  status.innerHTML = `
+    <h3>${title}</h3>
+    <div>${message}</div>
+    ${url ? `<div style="margin-top: 12px;"><a href="${url}" target="_blank">View Article →</a></div>` : ''}
+  `;
+  status.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function showProgress(steps) {
+  const status = document.getElementById('status');
+  status.className = 'status show info';
+  status.innerHTML = `
+    <div class="progress">
+      ${steps.map((step, i) => `
+        <div class="progress-step ${step.status}">
+          ${step.text}
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
 
 async function publish() {
   const owner = document.getElementById('repoOwner').value.trim();
   const repo = document.getElementById('repoName').value.trim();
   const token = document.getElementById('token').value.trim();
   const title = document.getElementById('title').value.trim();
-  const category = document.getElementById('category').value.trim() || 'General';
+  const category = document.getElementById('category').value;
+  const tags = document.getElementById('tags').value.trim().split(',').map(t => t.trim()).filter(t => t);
+  const image = document.getElementById('image').value.trim();
+  const description = document.getElementById('description').value.trim();
   const content = document.getElementById('content').value.trim();
-  const status = document.getElementById('status');
   const btn = document.getElementById('btn');
 
-  if (!owner || !token || !title || !content) { 
-    status.textContent = "⚠️ Fill all required fields"; 
-    return; 
+  if (!owner || !repo || !token) {
+    showStatus('error', '⚠️ Configuration Required', 'Please fill in GitHub username, repository name, and personal access token.');
+    return;
   }
-  
-  btn.disabled = true; 
-  btn.textContent = "Publishing..."; 
-  status.textContent = "Creating article...";
+
+  if (!title) {
+    showStatus('error', '⚠️ Title Required', 'Please enter an article title.');
+    return;
+  }
+
+  if (!content) {
+    showStatus('error', '⚠️ Content Required', 'Please write some content for your article.');
+    return;
+  }
+
+  if (content.split(/\s+/).length < 50) {
+    showStatus('error', '⚠️ Content Too Short', 'Please write at least 50 words for a quality article.');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="animation: spin 1s linear infinite;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Publishing...';
 
   const slug = slugify(title);
   const date = new Date().toISOString();
-  const excerpt = content.replace(/[#*`\n]/g, '').substring(0, 155).trim();
-  
+  const excerpt = description || content.replace(/[#*`\n\[\]()]/g, '').substring(0, 155).trim() + (description ? '' : '...');
+  const readTime = Math.max(1, Math.ceil(content.split(/\s+/).length / 200));
+
+  showProgress([
+    { text: 'Creating article HTML...', status: 'active' },
+    { text: 'Updating article index...', status: '' },
+    { text: 'Deploying to Netlify...', status: '' }
+  ]);
+
   const htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${title} | News.dyve.online</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${title} | DyveNews</title>
 <meta name="description" content="${excerpt}">
+<meta name="keywords" content="${tags.join(', ')}">
 <link rel="canonical" href="https://news.dyve.online/article/${slug}/">
 <meta property="og:title" content="${title}">
 <meta property="og:description" content="${excerpt}">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://news.dyve.online/article/${slug}/">
+${image ? `<meta property="og:image" content="${image}">` : ''}
 <meta property="article:published_time" content="${date}">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="/style.css">
+<meta property="article:author" content="DyveNews">
+<meta property="article:section" content="${category}">
+<meta property="article:tag" content="${tags.join(', ')}">
+<meta name="twitter:card" content="${image ? 'summary_large_image' : 'summary'}">
+<meta name="twitter:title" content="${title}">
+<meta name="twitter:description" content="${excerpt}">
+${image ? `<meta name="twitter:image" content="${image}">` : ''}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "${title}",
+  "description": "${excerpt}",
+  "datePublished": "${date}",
+  "dateModified": "${date}",
+  "author": {
+    "@type": "Organization",
+    "name": "DyveNews"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "DyveNews",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://news.dyve.online/logo.png"
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://news.dyve.online/article/${slug}/"
+  }${image ? `,\n  "image": "${image}"` : ''},
+  "wordCount": ${content.split(/\s+/).length},
+  "articleSection": "${category}",
+  "keywords": "${tags.join(', ')}"
+}
+<\/script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f8f9fa;
+    color: #202124;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+  .nav-logo {
+    font-size: 20px;
+    font-weight: 500;
+    color: #202124;
+    text-decoration: none;
+    letter-spacing: -0.5px;
+  }
+  .nav-logo span { color: #1a73e8; font-weight: 600; }
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #5f6368;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: #202124; }
+  .back-link svg { transition: transform 0.2s; }
+  .back-link:hover svg { transform: translateX(-4px); }
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 120px 24px 80px;
+  }
+  article {
+    background: white;
+    border-radius: 24px;
+    padding: 48px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  }
+  .article-header {
+    margin-bottom: 40px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid #e8eaed;
+  }
+  .article-category {
+    display: inline-block;
+    padding: 6px 14px;
+    background: rgba(26, 115, 232, 0.1);
+    color: #1a73e8;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 20px;
+  }
+  h1 {
+    font-size: 42px;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -1px;
+    color: #202124;
+    margin-bottom: 20px;
+  }
+  .article-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: #5f6368;
+    font-size: 14px;
+    flex-wrap: wrap;
+  }
+  .article-date { color: #9aa0a6; }
+  .article-image {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 16px;
+    margin: 32px 0;
+    background: #f1f3f4;
+  }
+  article p {
+    font-size: 18px;
+    line-height: 1.8;
+    color: #3c4043;
+    margin-bottom: 24px;
+  }
+  article h2 {
+    font-size: 28px;
+    font-weight: 500;
+    margin: 40px 0 20px;
+    color: #202124;
+    letter-spacing: -0.5px;
+  }
+  article h3 {
+    font-size: 22px;
+    font-weight: 500;
+    margin: 32px 0 16px;
+    color: #202124;
+  }
+  article a {
+    color: #1a73e8;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s;
+  }
+  article a:hover {
+    border-bottom-color: #1a73e8;
+  }
+  article strong {
+    font-weight: 600;
+    color: #202124;
+  }
+  article em {
+    font-style: italic;
+    color: #5f6368;
+  }
+  article ul, article ol {
+    margin: 24px 0;
+    padding-left: 32px;
+  }
+  article li {
+    margin-bottom: 12px;
+    font-size: 18px;
+    line-height: 1.7;
+    color: #3c4043;
+  }
+  article blockquote {
+    border-left: 4px solid #1a73e8;
+    padding: 20px 32px;
+    margin: 32px 0;
+    background: rgba(26, 115, 232, 0.05);
+    border-radius: 0 12px 12px 0;
+    font-style: italic;
+    color: #5f6368;
+  }
+  article blockquote p {
+    margin: 0;
+    font-size: 20px;
+    line-height: 1.7;
+  }
+  article code {
+    background: #f1f3f4;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 16px;
+    color: #d93025;
+  }
+  article pre {
+    background: #202124;
+    color: #e8eaed;
+    padding: 24px;
+    border-radius: 12px;
+    overflow-x: auto;
+    margin: 32px 0;
+  }
+  article pre code {
+    background: none;
+    padding: 0;
+    color: inherit;
+    font-size: 14px;
+  }
+  article img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+    margin: 24px 0;
+  }
+  .article-footer {
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid #e8eaed;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .share-links {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+  .share-links span {
+    color: #9aa0a6;
+    font-size: 14px;
+  }
+  .share-links a {
+    color: #5f6368;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.2s;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: #f1f3f4;
+  }
+  .share-links a:hover {
+    color: #1a73e8;
+    background: rgba(26, 115, 232, 0.1);
+  }
+  footer {
+    max-width: 720px;
+    margin: 40px auto 0;
+    padding: 0 24px 40px;
+    text-align: center;
+  }
+  footer a {
+    color: #1a73e8;
+    text-decoration: none;
+  }
+  footer a:hover { text-decoration: underline; }
+  @media (max-width: 768px) {
+    nav { padding: 12px 16px; }
+    main { padding: 100px 16px 60px; }
+    article { padding: 32px 24px; }
+    h1 { font-size: 32px; }
+    article h2 { font-size: 24px; }
+    article p { font-size: 17px; }
+    .article-image { height: 250px; }
+    .article-footer { flex-direction: column; align-items: flex-start; }
+  }
+</style>
 </head>
 <body>
-<header><h1><a href="/">News.dyve.online</a></h1></header>
-<main class="post">
-<a href="/" class="back-link">← Back to Home</a>
-<h1>${title}</h1>
-<div class="meta">${category} &bull; ${new Date(date).toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'})}</div>
-${parseMd(content)}
-</main>
-<footer>&copy; 2026 News.dyve.online</footer>
-</body></html>`;
+  <nav>
+    <a href="/" class="nav-logo">Dyve<span>News</span></a>
+    <a href="/" class="back-link">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      Back to Home
+    </a>
+  </nav>
+  <main>
+    <article>
+      <div class="article-header">
+        <span class="article-category">${category}</span>
+        <h1>${title}</h1>
+        <div class="article-meta">
+          <span class="article-date">${new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+          <span>•</span>
+          <span>${readTime} min read</span>
+          ${tags.length > 0 ? `<span>•</span><span>${tags.join(', ')}</span>` : ''}
+        </div>
+      </div>
+      ${image ? `<img src="${image}" alt="${title}" class="article-image" loading="lazy">` : ''}
+      ${parseMd(content)}
+      <div class="article-footer">
+        <a href="/" class="back-link">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+          More articles
+        </a>
+        <div class="share-links">
+          <span>Share:</span>
+          <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent('https://news.dyve.online/article/' + slug + '/')}" target="_blank" rel="noopener">Twitter</a>
+          <a href="https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent('https://news.dyve.online/article/' + slug + '/')}&title=${encodeURIComponent(title)}" target="_blank" rel="noopener">LinkedIn</a>
+          <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://news.dyve.online/article/' + slug + '/')}" target="_blank" rel="noopener">Facebook</a>
+        </div>
+      </div>
+    </article>
+  </main>
+  <footer>
+    <p style="color: #5f6368; font-size: 14px; margin-bottom: 8px;">
+      <a href="/">DyveNews</a> — Where stories and ideas ship together
+    </p>
+    <p style="color: #9aa0a6; font-size: 13px;">
+      &copy; 2026 Dyve. All rights reserved. | <a href="https://dyve.online">dyve.online</a>
+    </p>
+  </footer>
+</body>
+</html>`;
 
   try {
-    // 1. Create Article HTML
     const articlePath = `article/${slug}/index.html`;
     const articleRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${articlePath}`, {
       method: "PUT",
-      headers: { 
-        "Authorization": `Bearer ${token}`, 
+      headers: {
+        "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json",
         "Accept": "application/vnd.github.v3+json"
       },
-      body: JSON.stringify({ 
-        message: `Publish: ${title}`, 
-        content: btoa(unescape(encodeURIComponent(htmlContent))), 
-        branch: "main" 
+      body: JSON.stringify({
+        message: `Publish: ${title}`,
+        content: btoa(unescape(encodeURIComponent(htmlContent))),
+        branch: "main"
       })
     });
-    
+
     if (!articleRes.ok) {
       const err = await articleRes.json();
-      throw new Error(`GitHub API: ${err.message || articleRes.status}`);
+      throw new Error(`Failed to create article: ${err.message || articleRes.status}`);
     }
 
-    status.textContent = "Updating article index...";
+    showProgress([
+      { text: 'Creating article HTML...', status: 'complete' },
+      { text: 'Updating article index...', status: 'active' },
+      { text: 'Deploying to Netlify...', status: '' }
+    ]);
 
-    // 2. Update articles.json
     const jsonPath = 'articles.json';
     const jsonUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${jsonPath}`;
     let articles = [], sha = null;
 
-    const getRes = await fetch(jsonPath, { 
-      headers: { 
+    const getRes = await fetch(jsonPath, {
+      headers: {
         "Authorization": `Bearer ${token}`,
         "Accept": "application/vnd.github.v3+json"
-      } 
+      }
     });
-    
+
     if (getRes.ok) {
       const getData = await getRes.json();
       sha = getData.sha;
       try {
         articles = JSON.parse(atob(getData.content));
-      } catch(e) { articles = []; }
+      } catch (e) { articles = []; }
     }
 
-    // Remove duplicate if exists
     articles = articles.filter(a => a.slug !== slug);
-    articles.unshift({ title, slug, category, date, excerpt, url: `/article/${slug}/` });
+    articles.unshift({
+      title,
+      slug,
+      category,
+      tags,
+      date,
+      excerpt,
+      url: `/article/${slug}/`,
+      image: image || '',
+      readTime
+    });
 
     const updateRes = await fetch(jsonPath, {
       method: "PUT",
-      headers: { 
-        "Authorization": `Bearer ${token}`, 
+      headers: {
+        "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json",
         "Accept": "application/vnd.github.v3+json"
       },
-      body: JSON.stringify({ 
-        message: `Update index: ${title}`, 
-        content: btoa(unescape(encodeURIComponent(JSON.stringify(articles, null, 2)))), 
-        branch: "main", 
-        sha: sha || undefined 
+      body: JSON.stringify({
+        message: `Update index: ${title}`,
+        content: btoa(unescape(encodeURIComponent(JSON.stringify(articles, null, 2)))),
+        branch: "main",
+        sha: sha || undefined
       })
     });
-    
+
     if (!updateRes.ok) {
       const err = await updateRes.json();
-      throw new Error(`Index update failed: ${err.message || updateRes.status}`);
+      throw new Error(`Failed to update index: ${err.message || updateRes.status}`);
     }
 
-    status.textContent = `✅ Published!\n🔗 https://news.dyve.online/article/${slug}/\n\nNetlify will deploy in ~1 min.`;
+    showProgress([
+      { text: 'Creating article HTML...', status: 'complete' },
+      { text: 'Updating article index...', status: 'complete' },
+      { text: 'Deploying to Netlify...', status: 'complete' }
+    ]);
+
+    setTimeout(() => {
+      showStatus('success', '✅ Article Published Successfully!', 
+        `Your article "${title}" is now live and will be deployed to Netlify in ~1 minute.`,
+        `https://news.dyve.online/article/${slug}/`);
+    }, 500);
+
     document.getElementById('title').value = "";
     document.getElementById('content').value = "";
+    document.getElementById('tags').value = "";
+    document.getElementById('image').value = "";
+    document.getElementById('description').value = "";
+    updatePreview();
+
   } catch (e) {
-    status.textContent = `❌ Error: ${e.message}\n\nTip: Check your PAT has 'repo' scope`;
+    showStatus('error', '❌ Publishing Failed', 
+      `${e.message}<br><br><strong>Troubleshooting:</strong><br>
+       • Check that your GitHub token has 'repo' scope<br>
+       • Verify repository name is correct<br>
+       • Ensure you have write access to the repository`);
   } finally {
-    btn.disabled = false; 
-    btn.textContent = "Publish to GitHub";
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Publish Article`;
   }
 }
+
+document.getElementById('token').addEventListener('change', loadExistingArticles);
+updatePreview();
 </script>
+
+<style>
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+</style>
+
 </body>
 </html>
 
